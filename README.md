@@ -1,32 +1,25 @@
-# Revision Loop
+## Vibe coding
 
-A personal flashcard app with spaced repetition, built to be used for one real course
-rather than to look impressive.
+I built this by vibe coding — describing what I wanted to an AI, letting it write the
+code, then testing and correcting it. That's how the app exists at all; I couldn't have
+built it from scratch in the time I had.
 
-Student-Initiated Learning project. Vanilla HTML, CSS and JavaScript — no frameworks,
-no build step, no backend, no login.
+But I learned quickly that vibe coding only works if you're specific. My first prompts
+were vague ("make a flashcard app") and the results were generic and wrong. What
+actually worked was treating each prompt like a small specification: one change at a
+time, naming exactly which files were allowed to change, saying what to leave alone,
+and asking for a plan before any code got written.
 
-## Why
+The habit that helped most was splitting the work into phases. Each phase did one
+thing. When something broke, I could tell which change caused it, because only one
+thing had changed. When I skipped that discipline — asking for too much at once — I
+spent more time fixing the mess than I saved.
 
-Rereading notes feels productive but is one of the least effective ways to revise.
-Retrieval practice and spaced repetition work better, but most flashcard apps are
-either bloated or gated behind an account. Revision Loop is a small, local tool that
-does one thing: it shows you what's due today.
+I also learned that the AI doesn't know what I mean, only what I say. Half my bugs
+were my fault, not its: I hadn't said what should happen when a field was empty, or
+what "due" meant for a new card. Writing the answer down first became faster than
+debugging later.
 
-The app is also the vehicle for a second goal — learning to specify software precisely
-enough that an AI can build it correctly. The build was driven by written phases, one
-change per prompt, each naming the only files permitted to change.
-
-## Running it
-
-No install, no dependencies.
-
-**Option A — open the file**
-Double-click `index.html`.
-
-**Option B — local server (recommended)**
-Some browsers restrict `localStorage` on `file://`. If your decks disappear on refresh,
-run a local server instead:
-
-```bash
-python -m http.server 8000
+The honest summary: vibe coding got me a working app, but the app is only as good as
+the thinking I did before each prompt. The tool writes the code; you still have to
+know what you want.
