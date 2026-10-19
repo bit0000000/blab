@@ -20,12 +20,16 @@
     stats: 'screen-stats', statistics: 'screen-stats',
   };
 
+  const IS_LOCAL = location.hostname === 'localhost'
+    || location.protocol === 'file:';
+
   // ---------------------------------------------------------------- app state
   const state = {
     data: null,
     selectedDeckId: null,
     currentCard: null,
     idCounter: 0,
+    reviewQueue: null,   // snapshot of due cards, built on entering Review
   };
 
   // ---------------------------------------------------------------- utilities
@@ -100,6 +104,8 @@
   }
 
   function bindNav() {
+    // Matches nav buttons by their text. Adding a header button with the text
+    // "stats" or "decks" will route it too — name new buttons carefully.
     const scope = document.querySelector('nav') || document.querySelector('header');
     const buttons = (scope || document).querySelectorAll('button');
     buttons.forEach((button) => {
@@ -424,7 +430,8 @@
       });
 
       screen.appendChild(el('div', { id: 'review-card', class: 'review-card' },
-        back, deckName, question, revealButton, answer, ratingRow, empty, devButton,
+        back, deckName, question, revealButton, answer, ratingRow, empty,
+        IS_LOCAL ? devButton : null,
       ));
 
       this.els = { deckName, question, revealButton, answer, ratingRow, empty };
@@ -451,16 +458,31 @@
     render() {
       if (!this.els) return;
       const deck = state.selectedDeckId ? findDeck(state.selectedDeckId) : null;
-      this.els.deckName.textContent = deck ? `Reviewing: ${deck.name}` : '';
 
-      if (!deck) return this.showEmpty('Pick a deck first.');
+      if (!deck) {
+        this.els.deckName.textContent = '';
+        state.reviewQueue = null;
+        return this.showEmpty('Pick a deck first.');
+      }
 
-      const currentTime = now();
-      const due = state.data.cards.filter(
-        (card) => card.deckId === deck.id && isDue(card, currentTime),
-      );
+      // Build the queue once per Review session, so the set doesn't shift
+      // mid-session if the clock crosses midnight.
+      if (!state.reviewQueue) {
+        state.reviewQueue = state.data.cards
+          .filter((card) => card.deckId === deck.id && isDue(card, now()))
+          .sort((a, b) => (a.dueAt || 0) - (b.dueAt || 0));
+      }
 
-      if (due.length === 0) return this.showEmpty('Nothing due today.');
+      // Filter out anything already rated (its dueAt is now in the future).
+      const due = state.reviewQueue.filter((card) => isDue(card, now()));
+
+      if (due.length === 0) {
+        this.els.deckName.textContent = `Reviewing: ${deck.name}`;
+        state.reviewQueue = null;
+        return this.showEmpty('Nothing due today.');
+      }
+
+      this.els.deckName.textContent = `Reviewing: ${deck.name} · ${due.length} due`;
 
       state.currentCard = due[0];
       this.els.empty.hidden = true;
@@ -470,11 +492,15 @@
       this.els.answer.hidden = true;
       this.els.revealButton.hidden = false;
       this.els.ratingRow.hidden = true;
+
+      // Re-enable rating buttons (they may have been disabled by rateCard).
+      this.els.ratingRow.querySelectorAll('button').forEach((b) => { b.disabled = false; });
     },
 
     devMakeAllDue() {
       const timestamp = now().getTime();
       state.data.cards.forEach((card) => { card.dueAt = timestamp; });
+      state.reviewQueue = null;
       persist();
       this.render();
     },
@@ -482,6 +508,7 @@
 
   function openReviewForDeck(id) {
     state.selectedDeckId = id;
+    state.reviewQueue = null;   // rebuild for this deck
     reviewView.render();
     showScreen('screen-review');
   }
@@ -489,6 +516,10 @@
   function rateCard(rating) {
     const card = state.currentCard;
     if (!card) return;
+
+    // Disable rating buttons immediately, so a fast double-click can't
+    // rate the same card twice before render() replaces the DOM.
+    reviewView.els.ratingRow.querySelectorAll('button').forEach((b) => { b.disabled = true; });
 
     const currentTime = now();
     const next = nextDueAt(rating, currentTime);
@@ -531,8 +562,13 @@
         'Import JSON', importInput,
       );
 
+      const resetButton = el('button', {
+        type: 'button', class: 'btn btn-ghost btn-danger', text: 'Reset all data',
+        on: { click: () => resetAll() },
+      });
+
       screen.appendChild(el('div', { id: 'stats-wrap', class: 'stats-wrap' },
-        body, exportButton, importLabel,
+        body, exportButton, importLabel, IS_LOCAL ? resetButton : null,
       ));
 
       this.els = { body, exportButton, importInput };
@@ -543,7 +579,8 @@
       const currentTime = now();
       const todayKey = dayKey(currentTime);
       const dueCount = state.data.cards.filter((card) => isDue(card, currentTime)).length;
-      const reviewedToday = state.data.reviewsByDay[todayKey] || 0;
+      const reviewsByDay = state.data.reviewsByDay || {};
+      const reviewedToday = reviewsByDay[todayKey] || 0;
       const streak = computeStreak(currentTime);
 
       clearChildren(this.els.body);
@@ -558,6 +595,17 @@
     },
   };
 
+  function resetAll() {
+    if (!window.confirm('Delete all decks, cards and stats? This cannot be undone.')) return;
+    state.data = emptyState();
+    persist();
+    state.selectedDeckId = null;
+    state.currentCard = null;
+    state.reviewQueue = null;
+    deckView.render();
+    showScreen('screen-decks');
+  }
+
   function streakLabel(streak, reviewedToday) {
     if (reviewedToday > 0) return `${streak}-day streak`;
     if (streak > 0) return `${streak}-day streak · review today to keep it`;
@@ -565,17 +613,18 @@
   }
 
   function computeStreak(referenceTime) {
+    const reviewsByDay = state.data.reviewsByDay || {};
     const todayKey = dayKey(referenceTime);
     let cursor;
-    if ((state.data.reviewsByDay[todayKey] || 0) > 0) {
+    if ((reviewsByDay[todayKey] || 0) > 0) {
       cursor = todayKey;
     } else {
       const yesterdayKey = previousDayKey(todayKey);
-      if ((state.data.reviewsByDay[yesterdayKey] || 0) > 0) cursor = yesterdayKey;
+      if ((reviewsByDay[yesterdayKey] || 0) > 0) cursor = yesterdayKey;
       else return 0;
     }
     let count = 0;
-    while ((state.data.reviewsByDay[cursor] || 0) > 0) {
+    while ((reviewsByDay[cursor] || 0) > 0) {
       count += 1;
       cursor = previousDayKey(cursor);
     }
@@ -612,9 +661,12 @@
         );
         if (!confirmed) return;
 
+        // Replaces the object reference — never cache state.data elsewhere.
         state.data = parsed;
         persist();
         state.selectedDeckId = null;
+        state.currentCard = null;
+        state.reviewQueue = null;
         deckView.render();
         showScreen('screen-decks');
       } catch (error) {
