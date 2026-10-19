@@ -22,4 +22,4 @@ debugging later.
 
 The honest summary: vibe coding got me a working app, but the app is only as good as
 the thinking I did before each prompt. The tool writes the code; you still have to
-know what you want.
+know what you want. 
