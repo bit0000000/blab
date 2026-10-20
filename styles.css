@@ -1,33 +1,100 @@
-/* --- General Layout Updates --- */
-body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
+/* ==== Revision Loop — styles.css ==== */
+
+:root {
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --border: #E5E5E5;
+  --text: #222222;
+  --muted: #888888;
+  --accent: #2F6FB0; /* Keep the blue for the functional buttons */
+  --accent-h: #255A91;
+  --accent-soft: #F0F5FA;
+  --error: #D32F2F;
+  
+  --sidebar-bg: #1A1A1A; /* Not used for sidebar now, but kept for dark elements */
+  --tab-bg: rgba(255, 255, 255, 0.85);
+  
+  --again-bg: #B3261E;
+  --hard-bg: #8A5A00;
+  --good-bg: #1F6F43;
+  --easy-bg: #1F4E9C;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-bottom: 100px; /* Space for bottom tab bar */
+  -webkit-font-smoothing: antialiased;
+}
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ---------- Main Layout ---------- */
+.app-layout {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 .top-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  background: var(--bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  align-items: baseline;
+  padding: 30px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 30px;
 }
+
 .header-title {
   font-family: "Playfair Display", serif;
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: 400;
   margin: 0;
+  letter-spacing: -0.5px;
 }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
-/* --- CYLTabBar Animated Bottom Navigation --- */
+.header-sub {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+/* ---------- Typography ---------- */
+h1, h2, h3 {
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  color: var(--text);
+  margin-top: 0;
+}
+
+.screen-title {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.muted { color: var(--muted); font-size: 14px; font-style: italic; }
+.error { color: var(--error); font-size: 13px; margin-top: 8px; }
+
+/* ---------- Bottom Navigation (CYLTabBar Style) ---------- */
 .bottom-tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.85);
+  height: 72px;
+  background: var(--tab-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(0,0,0,0.06);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -49,33 +116,176 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
   font-size: 11px;
   cursor: pointer;
   width: 60px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* Springy transition */
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .tab-btn .tab-icon { font-size: 22px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-.tab-btn.active { color: var(--accent); font-weight: 600; }
+.tab-btn.active { color: var(--text); font-weight: 600; }
 .tab-btn.active .tab-icon { transform: translateY(-4px) scale(1.1); }
 
-/* Floating Center Button (CYLTabBar style) */
 .tab-center-btn {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--text);
   color: white;
   border: none;
-  font-size: 28px;
+  font-size: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -30px; /* Floats above the bar */
-  box-shadow: 0 8px 20px rgba(47, 111, 176, 0.4);
+  margin-top: -32px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .tab-center-btn:active { transform: scale(0.9); }
 
-/* --- 3D Flashcard Stack & Flip --- */
+/* ---------- Buttons & Inputs ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover { border-color: var(--muted); }
+.btn-primary { background: var(--text); color: #FFF; border-color: var(--text); }
+.btn-primary:hover { background: #000; }
+.btn-ghost { border: none; padding: 0 10px; background: transparent; }
+.btn-ghost:hover { background: var(--border); }
+.btn-danger { color: var(--error); }
+.btn-danger:hover { background: #FFF0F0; border-color: var(--error); }
+.btn-sort { padding: 0 12px; font-size: 16px; }
+.btn-sort:disabled { opacity: 0.2; cursor: not-allowed; }
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus, textarea:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+/* ---------- Deck & Card Lists ---------- */
+.deck-controls, .card-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.deck-controls input { flex: 1; min-width: 200px; }
+.card-controls { flex-direction: column; }
+.card-controls textarea { min-height: 60px; }
+
+.deck-list, .card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deck-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: box-shadow 0.2s;
+}
+.deck-row:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+
+.deck-name {
+  flex: 1;
+  background: none;
+  border: none;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  padding: 0;
+}
+.deck-name:hover { text-decoration: underline; }
+
+.card-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.card-text { flex: 1; }
+.card-q { font-weight: 600; margin: 0 0 4px; }
+.card-a { color: var(--muted); margin: 0; }
+.card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ---------- Empty States ---------- */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.8; }
+.empty-state h3 { margin: 0 0 8px; font-size: 18px; }
+
+/* ---------- Review Screen (3D Flashcards) ---------- */
+.review-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.progress-container {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--text);
+  width: 0%;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .flashcard-container {
   perspective: 1200px;
   width: 100%;
@@ -89,14 +299,13 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
   width: 100%;
   height: 100%;
   position: relative;
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy flip */
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-style: preserve-3d;
   cursor: pointer;
 }
 
 .flashcard.is-flipped { transform: rotateY(180deg); }
 
-/* The exit animation when a card is rated */
 .flashcard-container.card-exit {
   animation: fly-out 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
@@ -106,7 +315,6 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
   100% { transform: scale(0.9) translateX(100px) rotateZ(10deg); opacity: 0; }
 }
 
-/* Card Faces */
 .flashcard-face {
   position: absolute;
   width: 100%;
@@ -126,11 +334,41 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
 
 .flashcard-back {
   transform: rotateY(180deg);
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
-  border-color: var(--accent);
+  background: #FAFAFA;
+  border-color: var(--text);
 }
 
-/* --- Smooth Button & Staggered Rating Animations --- */
+.flashcard-hint {
+  position: absolute;
+  top: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.review-question {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(24px, 5vw, 36px);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.review-answer {
+  font-size: clamp(18px, 4vw, 24px);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.reveal-btn {
+  width: 100%;
+  max-width: 300px;
+  height: 50px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
 .rating-row {
   display: flex;
   gap: 12px;
@@ -140,25 +378,28 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
   transition: all 0.3s ease;
 }
 
-.rating-row:not([hidden]) {
-  opacity: 1;
-  transform: translateY(0);
-}
+.rating-row:not([hidden]) { opacity: 1; transform: translateY(0); }
 
 .rating-btn {
   flex: 1;
   height: 50px;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border: none;
+  color: white;
   transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.rating-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.rating-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .rating-btn:active { transform: translateY(1px) scale(0.97); }
 
-/* Keyframe for staggered entry of rating buttons */
+.rating-btn.rating-again { background: var(--again-bg); }
+.rating-btn.rating-hard { background: var(--hard-bg); }
+.rating-btn.rating-good { background: var(--good-bg); }
+.rating-btn.rating-easy { background: var(--easy-bg); }
+
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -167,3 +408,58 @@ body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
 .rating-row:not([hidden]) .rating-btn:nth-child(2) { animation: slide-up 0.3s 0.05s both; }
 .rating-row:not([hidden]) .rating-btn:nth-child(3) { animation: slide-up 0.3s 0.1s both; }
 .rating-row:not([hidden]) .rating-btn:nth-child(4) { animation: slide-up 0.3s 0.15s both; }
+
+/* ---------- Stats Screen ---------- */
+.stats-wrap {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.stats-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.stats-body dt { color: var(--muted); }
+.stats-body dd { margin: 0; font-family: "Playfair Display", serif; font-size: 26px; text-align: right; }
+
+/* ---------- Toasts ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--text);
+  color: var(--surface);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: toast-in 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Mobile Adjustments ---------- */
+@media (max-width: 600px) {
+  .flashcard-container { height: 320px; }
+  .flashcard-face { padding: 24px; }
+  .deck-row { flex-wrap: wrap; }
+  .deck-name { flex: 1 1 100%; }
+  .rating-row { flex-wrap: wrap; }
+  .rating-btn { flex: 1 1 45%; }
+}
