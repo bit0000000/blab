@@ -102,20 +102,27 @@
     document.querySelectorAll('.tab-btn, .tab-center-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var target = this.getAttribute('data-target');
-        var screenId = 'screen-' + target;
         
-        if (target === 'cards' && !state.selectedDeckId) {
-          showToast('Pick a deck first to add cards.');
-          return;
+        // Handle the Central "+" Button
+        if (target === 'cards') {
+          if (!state.selectedDeckId) {
+            showToast('Select a deck first to add cards.');
+            navigateTo('screen-decks');
+            return;
+          } else {
+            openCardsForDeck(state.selectedDeckId);
+            return;
+          }
         }
 
+        var screenId = 'screen-' + target;
         document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
         if (this.classList.contains('tab-btn')) this.classList.add('active');
         navigateTo(screenId);
       });
     });
 
-    // Global Keyboard Shortcuts for Review
+    // Keyboard Shortcuts for Review
     document.addEventListener('keydown', function(e) {
       if (byId('screen-review').hidden) return;
       
@@ -163,13 +170,20 @@
       }
       
       var self = this;
-      decks.forEach(function (deck) { self.els.list.appendChild(deckRow(deck)); });
+      decks.forEach(function (deck) { 
+        // Count how many cards are in this deck
+        var count = state.data.cards.filter(function(c) { return c.deckId === deck.id; }).length;
+        self.els.list.appendChild(deckRow(deck, count)); 
+      });
     }
   };
 
-  function deckRow(deck) {
+  function deckRow(deck, cardCount) {
     return el('li', { class: 'deck-row' },
-      el('button', { type: 'button', class: 'deck-name', text: deck.name, on: { click: function () { openCardsForDeck(deck.id); } } }),
+      el('div', { style: 'flex: 1; display: flex; flex-direction: column;' },
+        el('button', { type: 'button', class: 'deck-name', text: deck.name, on: { click: function () { openCardsForDeck(deck.id); } } }),
+        el('span', { class: 'muted', style: 'font-size: 12px; font-style: normal;', text: cardCount + (cardCount === 1 ? ' card' : ' cards') })
+      ),
       el('button', { type: 'button', class: 'btn btn-ghost', text: 'Study', on: { click: function () { openReviewForDeck(deck.id); } } }),
       el('button', { type: 'button', class: 'btn btn-ghost', text: 'Rename', on: { click: function () { renameDeck(deck.id); } } }),
       el('button', { type: 'button', class: 'btn btn-ghost btn-danger', text: 'Delete', on: { click: function () { deleteDeck(deck.id); } } })
@@ -177,6 +191,7 @@
   }
 
   function findDeck(id) { return state.data.decks.filter(function (d) { return d.id === id; })[0]; }
+  
   function addDeck() {
     if (!deckView.els) return;
     var name = deckView.els.input.value.trim();
@@ -189,6 +204,7 @@
     deckView.render();
     showToast('Deck created!');
   }
+  
   function renameDeck(id) {
     var deck = findDeck(id);
     var raw = window.prompt('New name:', deck.name);
@@ -197,6 +213,7 @@
     persist();
     deckView.render();
   }
+  
   function deleteDeck(id) {
     var deck = findDeck(id);
     if (!window.confirm('Delete "' + deck.name + '" and all its cards?')) return;
@@ -216,21 +233,30 @@
       var screen = byId('screen-cards');
       if (!screen) return;
 
-      var back = el('button', { type: 'button', class: 'btn btn-ghost', text: '← Back', on: { click: function () { showScreen('screen-decks'); } } });
+      // The title explicitly tells you which deck you are editing
+      var title = el('h2', { id: 'cards-heading', class: 'screen-title', text: 'Cards' });
+      var back = el('button', { type: 'button', class: 'btn btn-ghost', text: '← Back to Decks', on: { click: function () { showScreen('screen-decks'); } } });
       var question = el('textarea', { id: 'card-question', placeholder: 'Question', rows: 2 });
       var answer = el('textarea', { id: 'card-answer', placeholder: 'Answer', rows: 2 });
-      var addButton = el('button', { type: 'button', class: 'btn btn-primary', text: 'Add card', on: { click: addCard } });
+      var addButton = el('button', { type: 'button', class: 'btn btn-primary', text: 'Add Flashcard to this Deck', on: { click: addCard } });
       var list = el('ul', { class: 'card-list' });
 
+      screen.appendChild(title);
       screen.appendChild(el('div', { class: 'card-controls' }, back, question, answer, addButton));
       screen.appendChild(list);
-      this.els = { question: question, answer: answer, list: list };
+      this.els = { title: title, question: question, answer: answer, list: list };
     },
     render: function () {
       if (!this.els) return;
       clearChildren(this.els.list);
       if (!state.selectedDeckId) return;
       
+      var deck = findDeck(state.selectedDeckId);
+      if (deck) {
+        this.els.title.textContent = 'Editing: ' + deck.name;
+      }
+
+      // ONLY show cards for the selected deck
       var cards = state.data.cards.filter(function (c) { return c.deckId === state.selectedDeckId; });
       if (cards.length === 0) {
         this.els.list.appendChild(el('div', { class: 'empty-state' },
@@ -278,11 +304,13 @@
   }
 
   function openCardsForDeck(id) {
-    state.selectedDeckId = id;
-    var heading = byId('cards-heading');
-    if (heading) heading.textContent = findDeck(id).name;
+    state.selectedDeckId = id; // Sets the active deck
     cardView.render();
     showScreen('screen-cards');
+    
+    // Highlight the Decks tab
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelector('.tab-btn[data-target="decks"]').classList.add('active');
   }
 
   function addCard() {
@@ -291,12 +319,14 @@
     var a = cardView.els.answer.value.trim();
     if (!q || !a) return showToast('Both question and answer are required.');
     
+    // This pushes the card specifically to the active deck
     state.data.cards.push({ id: generateId(), deckId: state.selectedDeckId, question: q, answer: a, createdAt: Date.now(), dueAt: null, intervalDays: 0, lastRating: null, reps: 0 });
     persist();
+    
     cardView.els.question.value = '';
     cardView.els.answer.value = '';
     cardView.render();
-    showToast('Card added!');
+    showToast('Flashcard saved!');
   }
 
   function editCard(id) {
@@ -399,7 +429,6 @@
       this.els.progressBar.parentElement.hidden = false;
       this.els.flashcard.classList.remove('is-flipped');
       
-      // Update progress bar
       var percent = ((state.initialReviewCount - due.length) / state.initialReviewCount) * 100;
       this.els.progressBar.style.width = percent + '%';
 
