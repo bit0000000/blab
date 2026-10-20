@@ -4,46 +4,77 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Personal flashcard app with spaced repetition.">
-  <meta name="theme-color" content="#2F6FB0">
   <title>Revision Loop</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Using Inter and a Serif font to match the journal feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- All UI inside the four sections is built by js/app.js at runtime. -->
-  <header>
+
+  <!-- Sliding Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2>Revision Loop</h2>
+      <button id="close-menu" aria-label="Close menu">×</button>
+    </div>
     <nav aria-label="Primary">
       <button type="button">Decks</button>
       <button type="button">Review</button>
       <button type="button">Stats</button>
     </nav>
-  </header>
+    <div class="sidebar-footer">
+      <p>Personal flashcards.<br>Spaced repetition.</p>
+    </div>
+  </aside>
 
-  <main>
-    <section id="screen-decks" aria-labelledby="deck-heading">
-      <h1 id="deck-heading">Decks</h1>
-      <p class="muted">Pick a deck to study, or create a new one.</p>
-    </section>
+  <!-- Main Content Area -->
+  <div class="app-layout">
+    <header>
+      <button id="open-menu" aria-label="Open menu">☰</button>
+      <span class="header-title">Revision Loop</span>
+    </header>
 
-    <section id="screen-cards" aria-labelledby="cards-heading" hidden>
-      <h2 id="cards-heading">Cards</h2>
-    </section>
+    <main>
+      <section id="screen-decks" aria-labelledby="deck-heading">
+        <h1 id="deck-heading">Decks</h1>
+        <p class="muted">Pick a deck to study, or create a new one.</p>
+      </section>
 
-    <section id="screen-review" aria-labelledby="review-heading" hidden>
-      <h1 id="review-heading">Review</h1>
-    </section>
+      <section id="screen-cards" aria-labelledby="cards-heading" hidden>
+        <h2 id="cards-heading">Cards</h2>
+      </section>
 
-    <section id="screen-stats" aria-labelledby="stats-heading" hidden>
-      <h1 id="stats-heading">Stats</h1>
-    </section>
-  </main>
+      <section id="screen-review" aria-labelledby="review-heading" hidden>
+        <h1 id="review-heading">Review</h1>
+      </section>
+
+      <section id="screen-stats" aria-labelledby="stats-heading" hidden>
+        <h1 id="stats-heading">Stats</h1>
+      </section>
+    </main>
+  </div>
 
   <script src="js/storage.js"></script>
   <script src="js/scheduler.js"></script>
   <script src="js/app.js"></script>
+  
+  <!-- Script to handle the sidebar opening/closing -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('open-menu').addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+    document.getElementById('close-menu').addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+    // Close sidebar when a nav button is clicked
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.addEventListener('click', () => sidebar.classList.remove('open'));
+    });
+  </script>
 </body>
 </html>
