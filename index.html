@@ -1,31 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Personal flashcard app with spaced repetition.">
+  <meta name="theme-color" content="#222222">
+  <title>Revision Loop</title>
+
+  <!-- Elegant Serif + Clean Sans-Serif -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
 <body>
   <div class="app-layout">
     <header class="top-header">
       <h1 class="header-title">Revision Loop</h1>
-      <button id="open-menu" aria-label="Open menu">☰</button>
+      <span class="header-sub">Spaced Repetition</span>
     </header>
 
     <main>
+      <!-- Decks Screen -->
       <section id="screen-decks" aria-labelledby="deck-heading">
-        <h1 id="deck-heading">Decks</h1>
+        <h2 id="deck-heading" class="screen-title">Your Decks</h2>
         <p class="muted">Pick a deck to study, or create a new one.</p>
       </section>
 
+      <!-- Cards Screen -->
       <section id="screen-cards" aria-labelledby="cards-heading" hidden>
-        <h2 id="cards-heading">Cards</h2>
+        <h2 id="cards-heading" class="screen-title">Cards</h2>
       </section>
 
+      <!-- Review Screen -->
       <section id="screen-review" aria-labelledby="review-heading" hidden>
-        <h1 id="review-heading" class="sr-only">Review</h1>
+        <h2 id="review-heading" class="sr-only">Review</h2>
       </section>
 
+      <!-- Stats Screen -->
       <section id="screen-stats" aria-labelledby="stats-heading" hidden>
-        <h1 id="stats-heading">Stats</h1>
+        <h2 id="stats-heading" class="screen-title">Stats</h2>
       </section>
     </main>
   </div>
 
-  <!-- CYLTabBar-inspired Bottom Navigation -->
+  <!-- CYLTabBar-style Bottom Navigation -->
   <nav class="bottom-tab-bar" aria-label="Primary">
     <button type="button" class="tab-btn active" data-target="decks">
       <span class="tab-icon">🗂️</span>
@@ -36,8 +56,8 @@
       <span class="tab-text">Review</span>
     </button>
     
-    <!-- Floating Center Action Button (Classic CYLTabBar feature) -->
-    <button type="button" class="tab-center-btn" data-target="cards">
+    <!-- Floating Center Action Button -->
+    <button type="button" class="tab-center-btn" data-target="cards" aria-label="Add Cards">
       <span>+</span>
     </button>
 
@@ -47,5 +67,8 @@
     </button>
   </nav>
 
-  <!-- Keep your script tags here -->
+  <script src="js/storage.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/app.js"></script>
 </body>
+</html>
