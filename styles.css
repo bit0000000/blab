@@ -1,292 +1,169 @@
-:root {
-  --bg: #FAFAFA;
-  --surface: #FFFFFF;
-  --border: #E5E5E5;
-  --text: #222222;
-  --muted: #888888;
-  --accent: #222222; /* Minimalist black accent */
-  --accent-h: #000000;
-  --accent-soft: #F0F0F0;
-  --error: #D32F2F;
-  
-  /* The dark sidebar colors */
-  --sidebar-bg: #1A1A1A;
-  --sidebar-text: #F5F5F5;
-  --sidebar-muted: #999999;
-}
-
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Inter", system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-/* ---------- Sidebar ---------- */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -300px; /* Hidden by default */
-  width: 280px;
-  height: 100vh;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text);
-  transition: left 0.3s ease;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-}
-
-.sidebar.open { left: 0; }
-
-.sidebar-header {
+/* --- General Layout Updates --- */
+body { padding-bottom: 90px; /* Space for the bottom tab bar */ }
+.top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  padding: 20px 24px;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-
-.sidebar-header h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 20px;
-  font-weight: 400;
-  margin: 0;
-}
-
-#close-menu {
-  background: none;
-  border: none;
-  color: var(--sidebar-text);
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar nav button {
-  background: transparent;
-  border: none;
-  color: var(--sidebar-muted);
-  text-align: left;
-  font-size: 16px;
-  padding: 12px 0;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.2s;
-}
-
-.sidebar nav button:hover {
-  color: var(--sidebar-text);
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  font-size: 13px;
-  color: var(--sidebar-muted);
-}
-
-/* ---------- Main Layout ---------- */
-.app-layout {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 20px 60px;
-}
-
-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 0 40px;
-}
-
-#open-menu {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--text);
-  padding: 0;
-}
-
 .header-title {
   font-family: "Playfair Display", serif;
-  font-size: 18px;
-  color: var(--text);
+  font-size: 20px;
+  margin: 0;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* --- CYLTabBar Animated Bottom Navigation --- */
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  padding: 0 10px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
 }
 
-/* ---------- Typography ---------- */
-h1, h2, h3 {
-  font-family: "Playfair Display", serif;
-  font-weight: 400;
-  color: var(--text);
-  margin-top: 0;
-}
-
-h1 { font-size: 32px; margin-bottom: 8px; }
-h2 { font-size: 24px; margin-bottom: 16px; }
-
-.muted { color: var(--muted); font-size: 14px; font-style: italic; }
-.error { color: var(--error); font-size: 13px; margin-top: 8px; }
-
-/* ---------- Buttons & Inputs (Minimalist) ---------- */
-.btn {
-  display: inline-flex;
+.tab-btn {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 0 20px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  color: var(--text);
+  gap: 4px;
+  color: var(--muted);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 11px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  width: 60px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* Springy transition */
 }
 
-.btn:hover {
-  border-color: var(--text);
-}
+.tab-btn .tab-icon { font-size: 22px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+.tab-btn.active { color: var(--accent); font-weight: 600; }
+.tab-btn.active .tab-icon { transform: translateY(-4px) scale(1.1); }
 
-.btn-primary {
+/* Floating Center Button (CYLTabBar style) */
+.tab-center-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   background: var(--accent);
-  color: #FFF;
+  color: white;
+  border: none;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -30px; /* Floats above the bar */
+  box-shadow: 0 8px 20px rgba(47, 111, 176, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.tab-center-btn:active { transform: scale(0.9); }
+
+/* --- 3D Flashcard Stack & Flip --- */
+.flashcard-container {
+  perspective: 1200px;
+  width: 100%;
+  height: 400px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 5;
+}
+
+.flashcard {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy flip */
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.flashcard.is-flipped { transform: rotateY(180deg); }
+
+/* The exit animation when a card is rated */
+.flashcard-container.card-exit {
+  animation: fly-out 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes fly-out {
+  0% { transform: scale(1) translateX(0) rotateZ(0); opacity: 1; }
+  100% { transform: scale(0.9) translateX(100px) rotateZ(10deg); opacity: 0; }
+}
+
+/* Card Faces */
+.flashcard-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
   border-color: var(--accent);
 }
 
-.btn-primary:hover {
-  background: var(--accent-h);
-}
-
-.btn-ghost { border: none; padding: 0 10px; }
-.btn-ghost:hover { background: var(--accent-soft); }
-
-input[type="text"], textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  font-family: inherit;
-  font-size: 15px;
-}
-
-input[type="text"]:focus, textarea:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-/* ---------- Lists (Decks & Cards) ---------- */
-.deck-controls, .card-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.deck-controls input { flex: 1; min-width: 200px; }
-
-.deck-list, .card-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.deck-row, .card-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.deck-name {
-  flex: 1;
-  background: none;
-  border: none;
-  font-family: "Playfair Display", serif;
-  font-size: 20px;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text);
-}
-
-.deck-name:hover { font-style: italic; }
-
-.card-q { font-weight: 500; margin: 0 0 4px; }
-.card-a { color: var(--muted); margin: 0 0 12px; }
-
-/* ---------- Review Screen ---------- */
-.review-card {
-  text-align: center;
-  padding: 40px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.review-question {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  margin: 20px 0;
-}
-
-.review-answer {
-  font-size: 18px;
-  color: var(--muted);
-  margin: 20px 0;
-}
-
+/* --- Smooth Button & Staggered Rating Animations --- */
 .rating-row {
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 24px;
+  gap: 12px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.3s ease;
 }
 
-.rating-btn { flex: 1; max-width: 120px; }
-
-/* Keep your original colors for the rating buttons so they stand out */
-.rating-btn.rating-again { background: #B3261E; color: white; border: none; }
-.rating-btn.rating-hard { background: #8A5A00; color: white; border: none; }
-.rating-btn.rating-good { background: #1F6F43; color: white; border: none; }
-.rating-btn.rating-easy { background: #1F4E9C; color: white; border: none; }
-
-/* ---------- Stats ---------- */
-.stats-wrap {
-  margin-top: 20px;
+.rating-row:not([hidden]) {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.stats-body {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 16px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
-  margin-bottom: 24px;
+.rating-btn {
+  flex: 1;
+  height: 50px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.stats-body dt { color: var(--muted); }
-.stats-body dd { margin: 0; font-family: "Playfair Display", serif; font-size: 24px; text-align: right; }
+.rating-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.rating-btn:active { transform: translateY(1px) scale(0.97); }
 
-@media (max-width: 600px) {
-  .deck-row { flex-wrap: wrap; }
-  .rating-row { flex-wrap: wrap; }
-  .rating-btn { flex: 1 1 45%; max-width: none; }
+/* Keyframe for staggered entry of rating buttons */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+.rating-row:not([hidden]) .rating-btn:nth-child(1) { animation: slide-up 0.3s 0.0s both; }
+.rating-row:not([hidden]) .rating-btn:nth-child(2) { animation: slide-up 0.3s 0.05s both; }
+.rating-row:not([hidden]) .rating-btn:nth-child(3) { animation: slide-up 0.3s 0.1s both; }
+.rating-row:not([hidden]) .rating-btn:nth-child(4) { animation: slide-up 0.3s 0.15s both; }
