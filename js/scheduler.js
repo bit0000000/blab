@@ -1,4 +1,4 @@
-// ==== Revision Loop — scheduler.js ====
+ // ==== Revision Loop — scheduler.js ====
 // Pure scheduling logic. No DOM, no storage, no side effects.
 // Exposes globals: nextDueAt(rating, now), isDue(card, now)
 
