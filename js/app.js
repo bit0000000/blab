@@ -1,4 +1,4 @@
-// ==== Revision Loop — app.js ====
+ // ==== Revision Loop — app.js ====
 // UI layer. Depends on globals from storage.js and scheduler.js.
 
 (function () {
