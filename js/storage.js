@@ -1,4 +1,4 @@
-// ==== Revision Loop — storage.js ====
+ // ==== Revision Loop — storage.js ====
 // Saves and loads the app's data. Nothing else.
 // Public globals: STORAGE_KEY, emptyState(), loadState(), saveState(state)
 
