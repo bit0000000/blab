@@ -20,7 +20,9 @@
     currentCard: null,
     idCounter: 0,
     reviewQueue: null,
-    initialReviewCount: 0
+    initialReviewCount: 0,
+    sessionRatings: [], // NEW: Tracks ratings for the Confidence %
+    searchTerm: ''      // NEW: Tracks search text
   };
 
   // ---------------------------------------------------------------- Utilities
@@ -44,6 +46,21 @@
   function byId(id) { return document.getElementById(id); }
   function clearChildren(node) { node.textContent = ''; }
 
+  // NEW: Function to render Math formulas using KaTeX
+  function renderMath(node) {
+    if (window.renderMathInElement && node) {
+      window.renderMathInElement(node, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ],
+        throwOnError: false
+      });
+    }
+  }
+
   function showToast(message) {
     var container = document.querySelector('.toast-container');
     if (!container) {
@@ -60,7 +77,6 @@
     }, 3000);
   }
 
-  // --- MINIMALIST SVG ICONS (Lucide style) ---
   function getIcon(name, size = 16) {
     var svgs = {
       layers: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
@@ -74,7 +90,8 @@
       back: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
       download: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
       upload: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
-      refresh: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>'
+      refresh: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      search: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
     };
     var div = document.createElement('div');
     div.innerHTML = svgs[name] || '';
@@ -142,7 +159,6 @@
       });
     });
 
-    // Keyboard Shortcuts
     document.addEventListener('keydown', function(e) {
       if (byId('screen-review').hidden) return;
       if (e.code === 'Space' && !reviewView.els.revealButton.hidden) { e.preventDefault(); reviewView.reveal(); }
@@ -164,7 +180,7 @@
       if (!screen) return;
 
       var input = el('input', { type: 'text', id: 'deck-input', class: 'deck-input', placeholder: 'New deck name', maxLength: MAX_DECK_NAME, on: { keydown: function (e) { if (e.key === 'Enter') addDeck(); } } });
-      var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addDeck } }, getIcon('plus'), 'Add deck');
+      var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addDeck } }, getIcon('plus'), ' Add deck');
       var list = el('ul', { class: 'deck-list' });
 
       screen.appendChild(el('div', { class: 'deck-controls' }, input, addButton));
@@ -188,20 +204,21 @@
       var self = this;
       decks.forEach(function (deck) { 
         var count = state.data.cards.filter(function(c) { return c.deckId === deck.id; }).length;
-        self.els.list.appendChild(deckRow(deck, count)); 
+        var dueCount = state.data.cards.filter(function(c) { return c.deckId === deck.id && isDue(c, now()); }).length;
+        self.els.list.appendChild(deckRow(deck, count, dueCount)); 
       });
     }
   };
 
-  function deckRow(deck, cardCount) {
+  function deckRow(deck, cardCount, dueCount) {
     return el('li', { class: 'deck-row' },
       el('div', { style: 'flex: 1; display: flex; flex-direction: column;' },
         el('button', { type: 'button', class: 'deck-name', text: deck.name, on: { click: function () { openCardsForDeck(deck.id); } } }),
-        el('span', { class: 'muted', style: 'font-size: 12px; font-style: normal;', text: cardCount + (cardCount === 1 ? ' card' : ' cards') })
+        el('span', { class: 'muted', style: 'font-size: 12px; font-style: normal;', text: cardCount + ' cards · ' + dueCount + ' due' })
       ),
-      el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { openReviewForDeck(deck.id); } } }, getIcon('zap'), ' Study'),
-      el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { renameDeck(deck.id); } } }, getIcon('edit'), ' Rename'),
-      el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteDeck(deck.id); } } }, getIcon('trash'), ' Delete')
+      el('button', { type: 'button', class: 'btn btn-ghost', title: 'Study in order', on: { click: function () { openReviewForDeck(deck.id, false); } } }, getIcon('zap'), ' Study'),
+      el('button', { type: 'button', class: 'btn btn-ghost', title: 'Shuffle & Study', on: { click: function () { openReviewForDeck(deck.id, true); } } }, getIcon('refresh'), ' Shuffle'),
+      el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteDeck(deck.id); } } }, getIcon('trash'))
     );
   }
 
@@ -218,15 +235,6 @@
     deckView.els.input.value = '';
     deckView.render();
     showToast('Deck created!');
-  }
-  
-  function renameDeck(id) {
-    var deck = findDeck(id);
-    var raw = window.prompt('New name:', deck.name);
-    if (raw === null || !raw.trim()) return;
-    deck.name = raw.trim();
-    persist();
-    deckView.render();
   }
   
   function deleteDeck(id) {
@@ -250,15 +258,26 @@
 
       var title = el('h2', { id: 'cards-heading', class: 'screen-title', text: 'Cards' });
       var back = el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { showScreen('screen-decks'); } } }, getIcon('back'), ' Back to Decks');
-      var question = el('textarea', { id: 'card-question', placeholder: 'Question', rows: 2 });
-      var answer = el('textarea', { id: 'card-answer', placeholder: 'Answer', rows: 2 });
+      
+      // NEW: Search bar
+      var search = el('input', { 
+        type: 'text', 
+        placeholder: 'Search cards...', 
+        style: 'width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit;', 
+        on: { input: function(e) { state.searchTerm = e.target.value; cardView.render(); } }
+      });
+
+      var question = el('textarea', { id: 'card-question', placeholder: 'Question (Supports Math: $x^2$)', rows: 2 });
+      var answer = el('textarea', { id: 'card-answer', placeholder: 'Answer (Supports Math: \\( H_2O \\))', rows: 2 });
       var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addCard } }, getIcon('plus'), ' Add Flashcard');
       var list = el('ul', { class: 'card-list' });
 
       screen.appendChild(title);
+      screen.appendChild(search);
       screen.appendChild(el('div', { class: 'card-controls' }, back, question, answer, addButton));
       screen.appendChild(list);
-      this.els = { title: title, question: question, answer: answer, list: list };
+      
+      this.els = { title: title, question: question, answer: answer, list: list, search: search };
     },
     render: function () {
       if (!this.els) return;
@@ -268,12 +287,19 @@
       var deck = findDeck(state.selectedDeckId);
       if (deck) this.els.title.textContent = 'Editing: ' + deck.name;
 
-      var cards = state.data.cards.filter(function (c) { return c.deckId === state.selectedDeckId; });
+      // NEW: Filter by search term
+      var cards = state.data.cards.filter(function (c) { 
+        var matchesSearch = state.searchTerm === '' || 
+                            c.question.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
+                            c.answer.toLowerCase().includes(state.searchTerm.toLowerCase());
+        return c.deckId === state.selectedDeckId && matchesSearch;
+      });
+
       if (cards.length === 0) {
         this.els.list.appendChild(el('div', { class: 'empty-state' },
           el('div', { class: 'empty-icon' }, getIcon('edit', 48)),
-          el('h3', { text: 'No cards yet' }),
-          el('p', { class: 'muted', text: 'Add your first card using the boxes above.' })
+          el('h3', { text: state.searchTerm ? 'No cards found' : 'No cards yet' }),
+          el('p', { class: 'muted', text: state.searchTerm ? 'Try a different search term.' : 'Add your first card using the boxes above.' })
         ));
         return;
       }
@@ -287,11 +313,15 @@
     var isFirst = deckCards[0] && deckCards[0].id === card.id;
     var isLast = deckCards[deckCards.length - 1] && deckCards[deckCards.length - 1].id === card.id;
 
-    return el('li', { class: 'card-row' },
-      el('div', { class: 'card-text' },
-        el('p', { class: 'card-q', text: card.question }),
-        el('p', { class: 'card-a', text: card.answer })
-      ),
+    // Render Math inside the card list
+    var qDiv = el('p', { class: 'card-q' });
+    qDiv.innerHTML = card.question;
+    
+    var aDiv = el('p', { class: 'card-a' });
+    aDiv.innerHTML = card.answer;
+
+    var row = el('li', { class: 'card-row' },
+      el('div', { class: 'card-text' }, qDiv, aDiv),
       el('div', { class: 'card-actions' },
         el('button', { type: 'button', class: 'btn btn-ghost btn-sort', disabled: isFirst, on: { click: function () { moveCard(card.id, -1); } } }, getIcon('arrowUp')),
         el('button', { type: 'button', class: 'btn btn-ghost btn-sort', disabled: isLast, on: { click: function () { moveCard(card.id, 1); } } }, getIcon('arrowDown')),
@@ -299,6 +329,10 @@
         el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteCard(card.id); } } }, getIcon('trash'), ' Delete')
       )
     );
+
+    // Call KaTeX to render math after building the row
+    renderMath(row);
+    return row;
   }
 
   function moveCard(id, direction) {
@@ -316,6 +350,8 @@
 
   function openCardsForDeck(id) {
     state.selectedDeckId = id;
+    state.searchTerm = ''; // Reset search on deck open
+    if (cardView.els && cardView.els.search) cardView.els.search.value = '';
     cardView.render();
     showScreen('screen-cards');
     
@@ -340,9 +376,9 @@
 
   function editCard(id) {
     var card = state.data.cards.filter(function (c) { return c.id === id; })[0];
-    var q = window.prompt('Question:', card.question);
+    var q = window.prompt('Question (Use $ for math):', card.question);
     if (q === null) return;
-    var a = window.prompt('Answer:', card.answer);
+    var a = window.prompt('Answer (Use $ for math):', card.answer);
     if (a === null) return;
     if (!q.trim() || !a.trim()) return showToast('Fields cannot be empty.');
     card.question = q.trim(); card.answer = a.trim();
@@ -384,10 +420,8 @@
         ratingRow.appendChild(el('button', { type: 'button', class: 'btn rating-btn rating-' + r.id, text: r.label, on: { click: function () { rateCard(r.id); } } }));
       });
       
-      var empty = el('p', { class: 'muted', hidden: true, style: 'text-align: center; font-size: 18px; margin-top: 40px;' });
+      var empty = el('div', { class: 'muted', hidden: true, style: 'text-align: center; margin-top: 40px;' });
       var wrapper = el('div', { class: 'review-wrapper' }, progressContainer, deckName, flashcard, revealButton, ratingRow, empty);
-      
-      if (IS_LOCAL) wrapper.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', style: 'margin-top: 40px; font-size: 12px;', on: { click: function () { self.devMakeAllDue(); } } }, 'Dev: Make all due'));
       
       screen.appendChild(wrapper);
       this.els = { progressBar: byId('review-progress'), deckName: deckName, flashcard: flashcard.querySelector('.flashcard'), flashcardContainer: flashcard, question: byId('review-question'), answer: byId('review-answer'), revealButton: revealButton, ratingRow: ratingRow, empty: empty };
@@ -408,7 +442,28 @@
       this.els.ratingRow.hidden = true;
       this.els.progressBar.parentElement.hidden = true;
       this.els.empty.hidden = false;
-      this.els.empty.textContent = msg;
+      
+      // NEW: Confidence Score Calculation
+      if (state.sessionRatings.length > 0) {
+        var score = 0;
+        state.sessionRatings.forEach(function(r) {
+          if (r === 'easy') score += 100;
+          else if (r === 'good') score += 80;
+          else if (r === 'hard') score += 50;
+          else if (r === 'again') score += 0;
+        });
+        var percent = Math.round(score / state.sessionRatings.length);
+        
+        this.els.empty.innerHTML = `
+          <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+          <h3 style="margin-bottom: 8px; font-family: 'Playfair Display', serif;">Review Complete!</h3>
+          <p style="font-size: 28px; color: var(--accent); font-weight: 700; margin: 10px 0;">${percent}% Confidence</p>
+          <p class="muted" style="margin-bottom: 20px;">Based on how you rated your cards today.</p>
+          <button class="btn btn-primary" style="padding: 0 30px;" onclick="document.querySelector('.tab-btn[data-target=\\'decks\\']').click()">Back to Decks</button>
+        `;
+      } else {
+        this.els.empty.textContent = msg;
+      }
     },
 
     render: function () {
@@ -422,7 +477,14 @@
 
       if (!state.reviewQueue) {
         var t = now();
-        state.reviewQueue = state.data.cards.filter(function (c) { return c.deckId === deck.id && isDue(c, t); }).sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); });
+        state.reviewQueue = state.data.cards.filter(function (c) { return c.deckId === deck.id && isDue(c, t); });
+        // Apply shuffle if requested
+        if (window.shuffleNext) {
+          state.reviewQueue.sort(function() { return Math.random() - 0.5; });
+          window.shuffleNext = false;
+        } else {
+          state.reviewQueue.sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); });
+        }
         state.initialReviewCount = state.reviewQueue.length;
       }
       
@@ -444,24 +506,23 @@
       this.els.deckName.textContent = 'Reviewing: ' + deck.name + ' (' + due.length + ' left)';
       state.currentCard = due[0];
       this.els.empty.hidden = true;
-      this.els.question.textContent = state.currentCard.question;
-      this.els.answer.textContent = state.currentCard.answer;
+      
+      // Render Math in the flashcard
+      this.els.question.innerHTML = state.currentCard.question;
+      this.els.answer.innerHTML = state.currentCard.answer;
+      renderMath(this.els.flashcardContainer);
+
       this.els.revealButton.hidden = false;
       this.els.ratingRow.hidden = true;
       this.els.ratingRow.querySelectorAll('button').forEach(function (b) { b.disabled = false; });
-    },
-
-    devMakeAllDue: function () {
-      state.data.cards.forEach(function (c) { c.dueAt = now().getTime(); });
-      state.reviewQueue = null;
-      persist();
-      this.render();
     }
   };
 
-  function openReviewForDeck(id) {
+  function openReviewForDeck(id, shuffle = false) {
     state.selectedDeckId = id;
     state.reviewQueue = null;
+    state.sessionRatings = []; // Reset confidence tracking
+    window.shuffleNext = shuffle; // Set flag for render
     reviewView.render();
     showScreen('screen-review');
     
@@ -474,6 +535,8 @@
     if (!card) return;
     reviewView.els.ratingRow.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     reviewView.els.flashcardContainer.classList.add('card-exit');
+
+    state.sessionRatings.push(rating); // Track rating
 
     setTimeout(function () {
       var t = now();
