@@ -1,23 +1,31 @@
-/* ==== Revision Loop — styles.css ==== */
-
 :root {
-  --bg: #FAFAFA;
-  --surface: #FFFFFF;
-  --border: #E5E5E5;
-  --text: #222222;
-  --muted: #888888;
-  --accent: #2F6FB0; /* Keep the blue for the functional buttons */
-  --accent-h: #255A91;
-  --accent-soft: #F0F5FA;
-  --error: #D32F2F;
-  
-  --sidebar-bg: #1A1A1A; /* Not used for sidebar now, but kept for dark elements */
-  --tab-bg: rgba(255, 255, 255, 0.85);
-  
+  /* 背景与表面 */
+  --bg: #F7F9FC;               /* 极浅的冷调蓝白，接近 yueliang 的纸感 */
+  --surface: #FFFFFF;           /* 卡片表面保持纯白，形成层次 */
+  --border: #E2E8F0;           /* 浅蓝灰边框，不抢视觉 */
+
+  /* 文字 */
+  --text: #1A2332;             /* 深海军蓝，比纯黑柔和 */
+  --muted: #64748B;            /* 蓝灰，用于辅助文字 */
+
+  /* 强调色（按钮、链接、激活态） */
+  --accent: #2563EB;           /* 明亮的皇家蓝，用于主要 CTA */
+  --accent-h: #1D4ED8;         /* 悬停时加深 */
+  --accent-soft: rgba(37, 99, 235, 0.08);  /* 极淡的蓝色背景，用于悬停/选中 */
+  --on-accent: #FFFFFF;
+
   --again-bg: #B3261E;
   --hard-bg: #8A5A00;
   --good-bg: #1F6F43;
   --easy-bg: #1F4E9C;
+
+  --error: #B3261E;
+  --radius: 12px;
+  --radius-sm: 9px;
+  --shadow: 0 4px 16px rgba(26, 35, 50, 0.06);
+  --shadow-hover: 0 8px 24px rgba(26, 35, 50, 0.10);
+
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
