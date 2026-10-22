@@ -1,4 +1,4 @@
- // ==== Revision Loop — app.js ====
+// ==== Revision Loop — app.js ====
 // UI layer. Depends on globals from storage.js and scheduler.js.
 
 (function () {
@@ -60,6 +60,27 @@
     }, 3000);
   }
 
+  // --- MINIMALIST SVG ICONS (Lucide style) ---
+  function getIcon(name, size = 16) {
+    var svgs = {
+      layers: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
+      zap: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',
+      chart: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
+      plus: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+      trash: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+      edit: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
+      arrowUp: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>',
+      arrowDown: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>',
+      back: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+      download: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+      upload: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+      refresh: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>'
+    };
+    var div = document.createElement('div');
+    div.innerHTML = svgs[name] || '';
+    return div.firstElementChild;
+  }
+
   function el(tag, props, ...children) {
     props = props || {};
     var node = document.createElement(tag);
@@ -103,7 +124,6 @@
       btn.addEventListener('click', function () {
         var target = this.getAttribute('data-target');
         
-        // Handle the Central "+" Button
         if (target === 'cards') {
           if (!state.selectedDeckId) {
             showToast('Select a deck first to add cards.');
@@ -122,14 +142,10 @@
       });
     });
 
-    // Keyboard Shortcuts for Review
+    // Keyboard Shortcuts
     document.addEventListener('keydown', function(e) {
       if (byId('screen-review').hidden) return;
-      
-      if (e.code === 'Space' && !reviewView.els.revealButton.hidden) {
-        e.preventDefault();
-        reviewView.reveal();
-      }
+      if (e.code === 'Space' && !reviewView.els.revealButton.hidden) { e.preventDefault(); reviewView.reveal(); }
       if (!reviewView.els.ratingRow.hidden) {
         if (e.key === '1') rateCard('again');
         if (e.key === '2') rateCard('hard');
@@ -148,7 +164,7 @@
       if (!screen) return;
 
       var input = el('input', { type: 'text', id: 'deck-input', class: 'deck-input', placeholder: 'New deck name', maxLength: MAX_DECK_NAME, on: { keydown: function (e) { if (e.key === 'Enter') addDeck(); } } });
-      var addButton = el('button', { type: 'button', class: 'btn btn-primary', text: 'Add deck', on: { click: addDeck } });
+      var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addDeck } }, getIcon('plus'), 'Add deck');
       var list = el('ul', { class: 'deck-list' });
 
       screen.appendChild(el('div', { class: 'deck-controls' }, input, addButton));
@@ -162,7 +178,7 @@
       
       if (decks.length === 0) {
         this.els.list.appendChild(el('div', { class: 'empty-state' },
-          el('div', { class: 'empty-icon', text: '📂' }),
+          el('div', { class: 'empty-icon' }, getIcon('layers', 48)),
           el('h3', { text: 'No decks yet' }),
           el('p', { class: 'muted', text: 'Create your first deck above to start studying.' })
         ));
@@ -171,7 +187,6 @@
       
       var self = this;
       decks.forEach(function (deck) { 
-        // Count how many cards are in this deck
         var count = state.data.cards.filter(function(c) { return c.deckId === deck.id; }).length;
         self.els.list.appendChild(deckRow(deck, count)); 
       });
@@ -184,9 +199,9 @@
         el('button', { type: 'button', class: 'deck-name', text: deck.name, on: { click: function () { openCardsForDeck(deck.id); } } }),
         el('span', { class: 'muted', style: 'font-size: 12px; font-style: normal;', text: cardCount + (cardCount === 1 ? ' card' : ' cards') })
       ),
-      el('button', { type: 'button', class: 'btn btn-ghost', text: 'Study', on: { click: function () { openReviewForDeck(deck.id); } } }),
-      el('button', { type: 'button', class: 'btn btn-ghost', text: 'Rename', on: { click: function () { renameDeck(deck.id); } } }),
-      el('button', { type: 'button', class: 'btn btn-ghost btn-danger', text: 'Delete', on: { click: function () { deleteDeck(deck.id); } } })
+      el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { openReviewForDeck(deck.id); } } }, getIcon('zap'), ' Study'),
+      el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { renameDeck(deck.id); } } }, getIcon('edit'), ' Rename'),
+      el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteDeck(deck.id); } } }, getIcon('trash'), ' Delete')
     );
   }
 
@@ -233,12 +248,11 @@
       var screen = byId('screen-cards');
       if (!screen) return;
 
-      // The title explicitly tells you which deck you are editing
       var title = el('h2', { id: 'cards-heading', class: 'screen-title', text: 'Cards' });
-      var back = el('button', { type: 'button', class: 'btn btn-ghost', text: '← Back to Decks', on: { click: function () { showScreen('screen-decks'); } } });
+      var back = el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { showScreen('screen-decks'); } } }, getIcon('back'), ' Back to Decks');
       var question = el('textarea', { id: 'card-question', placeholder: 'Question', rows: 2 });
       var answer = el('textarea', { id: 'card-answer', placeholder: 'Answer', rows: 2 });
-      var addButton = el('button', { type: 'button', class: 'btn btn-primary', text: 'Add Flashcard to this Deck', on: { click: addCard } });
+      var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addCard } }, getIcon('plus'), ' Add Flashcard');
       var list = el('ul', { class: 'card-list' });
 
       screen.appendChild(title);
@@ -252,15 +266,12 @@
       if (!state.selectedDeckId) return;
       
       var deck = findDeck(state.selectedDeckId);
-      if (deck) {
-        this.els.title.textContent = 'Editing: ' + deck.name;
-      }
+      if (deck) this.els.title.textContent = 'Editing: ' + deck.name;
 
-      // ONLY show cards for the selected deck
       var cards = state.data.cards.filter(function (c) { return c.deckId === state.selectedDeckId; });
       if (cards.length === 0) {
         this.els.list.appendChild(el('div', { class: 'empty-state' },
-          el('div', { class: 'empty-icon', text: '📝' }),
+          el('div', { class: 'empty-icon' }, getIcon('edit', 48)),
           el('h3', { text: 'No cards yet' }),
           el('p', { class: 'muted', text: 'Add your first card using the boxes above.' })
         ));
@@ -282,10 +293,10 @@
         el('p', { class: 'card-a', text: card.answer })
       ),
       el('div', { class: 'card-actions' },
-        el('button', { type: 'button', class: 'btn btn-ghost btn-sort', text: '↑', disabled: isFirst, on: { click: function () { moveCard(card.id, -1); } } }),
-        el('button', { type: 'button', class: 'btn btn-ghost btn-sort', text: '↓', disabled: isLast, on: { click: function () { moveCard(card.id, 1); } } }),
-        el('button', { type: 'button', class: 'btn btn-ghost', text: 'Edit', on: { click: function () { editCard(card.id); } } }),
-        el('button', { type: 'button', class: 'btn btn-ghost btn-danger', text: 'Delete', on: { click: function () { deleteCard(card.id); } } })
+        el('button', { type: 'button', class: 'btn btn-ghost btn-sort', disabled: isFirst, on: { click: function () { moveCard(card.id, -1); } } }, getIcon('arrowUp')),
+        el('button', { type: 'button', class: 'btn btn-ghost btn-sort', disabled: isLast, on: { click: function () { moveCard(card.id, 1); } } }, getIcon('arrowDown')),
+        el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { editCard(card.id); } } }, getIcon('edit'), ' Edit'),
+        el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteCard(card.id); } } }, getIcon('trash'), ' Delete')
       )
     );
   }
@@ -304,11 +315,10 @@
   }
 
   function openCardsForDeck(id) {
-    state.selectedDeckId = id; // Sets the active deck
+    state.selectedDeckId = id;
     cardView.render();
     showScreen('screen-cards');
     
-    // Highlight the Decks tab
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelector('.tab-btn[data-target="decks"]').classList.add('active');
   }
@@ -319,7 +329,6 @@
     var a = cardView.els.answer.value.trim();
     if (!q || !a) return showToast('Both question and answer are required.');
     
-    // This pushes the card specifically to the active deck
     state.data.cards.push({ id: generateId(), deckId: state.selectedDeckId, question: q, answer: a, createdAt: Date.now(), dueAt: null, intervalDays: 0, lastRating: null, reps: 0 });
     persist();
     
@@ -378,7 +387,7 @@
       var empty = el('p', { class: 'muted', hidden: true, style: 'text-align: center; font-size: 18px; margin-top: 40px;' });
       var wrapper = el('div', { class: 'review-wrapper' }, progressContainer, deckName, flashcard, revealButton, ratingRow, empty);
       
-      if (IS_LOCAL) wrapper.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: 'Dev: Make all due', style: 'margin-top: 40px; font-size: 12px;', on: { click: function () { self.devMakeAllDue(); } } }));
+      if (IS_LOCAL) wrapper.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', style: 'margin-top: 40px; font-size: 12px;', on: { click: function () { self.devMakeAllDue(); } } }, 'Dev: Make all due'));
       
       screen.appendChild(wrapper);
       this.els = { progressBar: byId('review-progress'), deckName: deckName, flashcard: flashcard.querySelector('.flashcard'), flashcardContainer: flashcard, question: byId('review-question'), answer: byId('review-answer'), revealButton: revealButton, ratingRow: ratingRow, empty: empty };
@@ -491,15 +500,16 @@
       if (!screen) return;
 
       var body = el('dl', { class: 'stats-body' });
-      var exportBtn = el('button', { type: 'button', class: 'btn btn-primary', text: 'Export JSON', on: { click: exportJSON } });
+      var exportBtn = el('button', { type: 'button', class: 'btn btn-primary', on: { click: exportJSON } }, getIcon('download'), ' Export JSON');
+      
       var importInput = el('input', { type: 'file', accept: '.json', hidden: true });
       importInput.addEventListener('change', function () { if (this.files[0]) importJSON(this.files[0]); this.value = ''; });
-      var importLabel = el('label', { class: 'btn btn-ghost', style: 'margin-left: 8px;' }, 'Import JSON', importInput);
+      var importLabel = el('label', { class: 'btn btn-ghost', style: 'margin-left: 8px; cursor: pointer;' }, getIcon('upload'), ' Import JSON', importInput);
 
       var wrap = el('div', { class: 'stats-wrap' }, body, el('div', {}, exportBtn, importLabel));
       
       if (IS_LOCAL) {
-        wrap.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-danger', text: 'Reset all data', style: 'margin-top: 20px;', on: { click: resetAll } }));
+        wrap.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-danger', style: 'margin-top: 20px;', on: { click: resetAll } }, getIcon('refresh'), ' Reset all data'));
       }
       screen.appendChild(wrap);
       this.els = { body: body };
