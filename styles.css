@@ -10,7 +10,7 @@
   --text: #1A2332;             
   --muted: #64748B;            
 
-  /* 强调色（按钮、链接、激活态） */
+  /* 强调色（蓝色主题） */
   --accent: #2563EB;           
   --accent-h: #1D4ED8;         
   --accent-soft: rgba(37, 99, 235, 0.08); 
@@ -28,7 +28,7 @@
   --shadow: 0 4px 16px rgba(26, 35, 50, 0.06);
   --shadow-hover: 0 8px 24px rgba(26, 35, 50, 0.10);
 
-  /* 补上之前遗漏的导航栏背景色 */
+  /* 导航栏背景 */
   --tab-bg: rgba(255, 255, 255, 0.85);
 
   color-scheme: light;
@@ -40,7 +40,6 @@
 body {
   margin: 0;
   min-height: 100vh;
-  /* 加了一点点蓝色的径向渐变，显得不那么死板 */
   background: radial-gradient(ellipse at 85% 0%, rgba(37, 99, 235, 0.05), transparent 30rem), var(--bg);
   color: var(--text);
   font-family: "Inter", system-ui, sans-serif;
@@ -52,7 +51,7 @@ body {
 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
-/* ---------- Main Layout ---------- */
+/* ---------- 布局 ---------- */
 .app-layout {
   max-width: 720px;
   margin: 0 auto;
@@ -83,7 +82,7 @@ body {
   color: var(--muted);
 }
 
-/* ---------- Typography ---------- */
+/* ---------- 字体排版 ---------- */
 h1, h2, h3 {
   font-family: "Playfair Display", serif;
   font-weight: 400;
@@ -91,15 +90,11 @@ h1, h2, h3 {
   margin-top: 0;
 }
 
-.screen-title {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
+.screen-title { font-size: 28px; margin-bottom: 8px; }
 .muted { color: var(--muted); font-size: 14px; font-style: italic; }
 .error { color: var(--error); font-size: 13px; margin-top: 8px; }
 
-/* ---------- Bottom Navigation (CYLTabBar Style) ---------- */
+/* ---------- 底部导航栏 ---------- */
 .bottom-tab-bar {
   position: fixed;
   bottom: 0;
@@ -134,34 +129,35 @@ h1, h2, h3 {
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.tab-btn .tab-icon { font-size: 22px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+.tab-btn svg { width: 22px; height: 22px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
 .tab-btn.active { color: var(--accent); font-weight: 600; }
-.tab-btn.active .tab-icon { transform: translateY(-4px) scale(1.1); }
+.tab-btn.active svg { transform: translateY(-4px) scale(1.1); }
 
 .tab-center-btn {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--accent); /* 改成了主题蓝 */
+  background: var(--accent);
   color: white;
   border: none;
-  font-size: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -32px;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); /* 蓝色阴影 */
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.tab-center-btn svg { width: 26px; height: 26px; }
 .tab-center-btn:active { transform: scale(0.9); }
 
-/* ---------- Buttons & Inputs ---------- */
+/* ---------- 按钮与输入框 ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 44px;
   padding: 0 20px;
   border: 1px solid var(--border);
@@ -176,16 +172,13 @@ h1, h2, h3 {
 }
 
 .btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* 主按钮改成了主题蓝 */
 .btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
 .btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); color: var(--on-accent); }
-
 .btn-ghost { border: none; padding: 0 10px; background: transparent; }
 .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
 .btn-danger { color: var(--error); }
 .btn-danger:hover { background: #FFF0F0; border-color: var(--error); color: var(--error); }
-.btn-sort { padding: 0 12px; font-size: 16px; }
+.btn-sort { padding: 0 12px; }
 .btn-sort:disabled { opacity: 0.2; cursor: not-allowed; }
 
 input[type="text"], textarea {
@@ -202,15 +195,15 @@ input[type="text"], textarea {
 input[type="text"]:focus, textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft); /* 聚焦时有一圈淡淡的光晕 */
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* ---------- Deck & Card Lists ---------- */
+/* ---------- 卡组与卡片列表 ---------- */
 .deck-controls, .card-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   padding: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -219,7 +212,7 @@ input[type="text"]:focus, textarea:focus {
 
 .deck-controls input { flex: 1; min-width: 200px; }
 .card-controls { flex-direction: column; }
-.card-controls textarea { min-height: 60px; }
+.card-controls textarea { min-height: 80px; }
 
 .deck-list, .card-list {
   list-style: none;
@@ -266,11 +259,17 @@ input[type="text"]:focus, textarea:focus {
   border-radius: 12px;
 }
 .card-text { flex: 1; }
+
+/* 多行支持的核心代码 */
+.card-q, .card-a, .review-question, .review-answer {
+  white-space: pre-wrap; 
+}
+
 .card-q { font-weight: 600; margin: 0 0 4px; }
 .card-a { color: var(--muted); margin: 0; }
-.card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
 
-/* ---------- Empty States ---------- */
+/* ---------- 空状态 ---------- */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -278,10 +277,10 @@ input[type="text"]:focus, textarea:focus {
   border: 1px dashed var(--border);
   border-radius: 16px;
 }
-.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.8; color: var(--accent); }
+.empty-icon { margin-bottom: 16px; opacity: 0.8; color: var(--accent); display: flex; justify-content: center; }
 .empty-state h3 { margin: 0 0 8px; font-size: 18px; }
 
-/* ---------- Review Screen (3D Flashcards) ---------- */
+/* ---------- 复习界面 (3D 闪卡) ---------- */
 .review-wrapper {
   display: flex;
   flex-direction: column;
@@ -301,7 +300,7 @@ input[type="text"]:focus, textarea:focus {
 }
 .progress-bar {
   height: 100%;
-  background: var(--accent); /* 进度条改成蓝色 */
+  background: var(--accent); 
   width: 0%;
   transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -355,7 +354,7 @@ input[type="text"]:focus, textarea:focus {
 .flashcard-back {
   transform: rotateY(180deg);
   background: #F8FAFC;
-  border-color: var(--accent); /* 卡片背面的边框改成蓝色 */
+  border-color: var(--accent);
 }
 
 .flashcard-hint {
@@ -429,7 +428,7 @@ input[type="text"]:focus, textarea:focus {
 .rating-row:not([hidden]) .rating-btn:nth-child(3) { animation: slide-up 0.3s 0.1s both; }
 .rating-row:not([hidden]) .rating-btn:nth-child(4) { animation: slide-up 0.3s 0.15s both; }
 
-/* ---------- Stats Screen ---------- */
+/* ---------- 统计界面 ---------- */
 .stats-wrap {
   padding: 24px;
   background: var(--surface);
@@ -445,7 +444,7 @@ input[type="text"]:focus, textarea:focus {
 .stats-body dt { color: var(--muted); }
 .stats-body dd { margin: 0; font-family: "Playfair Display", serif; font-size: 26px; text-align: right; color: var(--accent); }
 
-/* ---------- Toasts ---------- */
+/* ---------- 提示框 (Toasts) ---------- */
 .toast-container {
   position: fixed;
   bottom: 100px;
@@ -474,12 +473,12 @@ input[type="text"]:focus, textarea:focus {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ---------- Mobile Adjustments ---------- */
+/* ---------- 手机端适配 ---------- */
 @media (max-width: 600px) {
   .flashcard-container { height: 320px; }
   .flashcard-face { padding: 24px; }
   .deck-row { flex-wrap: wrap; }
-  .deck-name { flex: 1 1 100%; }
+  .deck-name { flex: 1 1 100%; margin-bottom: 8px; }
   .rating-row { flex-wrap: wrap; }
   .rating-btn { flex: 1 1 45%; }
 }
