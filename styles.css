@@ -1,19 +1,22 @@
+/* ==== Revision Loop — styles.css ==== */
+
 :root {
   /* 背景与表面 */
-  --bg: #F7F9FC;               /* 极浅的冷调蓝白，接近 yueliang 的纸感 */
-  --surface: #FFFFFF;           /* 卡片表面保持纯白，形成层次 */
-  --border: #E2E8F0;           /* 浅蓝灰边框，不抢视觉 */
+  --bg: #F7F9FC;               
+  --surface: #FFFFFF;           
+  --border: #E2E8F0;           
 
   /* 文字 */
-  --text: #1A2332;             /* 深海军蓝，比纯黑柔和 */
-  --muted: #64748B;            /* 蓝灰，用于辅助文字 */
+  --text: #1A2332;             
+  --muted: #64748B;            
 
   /* 强调色（按钮、链接、激活态） */
-  --accent: #2563EB;           /* 明亮的皇家蓝，用于主要 CTA */
-  --accent-h: #1D4ED8;         /* 悬停时加深 */
-  --accent-soft: rgba(37, 99, 235, 0.08);  /* 极淡的蓝色背景，用于悬停/选中 */
+  --accent: #2563EB;           
+  --accent-h: #1D4ED8;         
+  --accent-soft: rgba(37, 99, 235, 0.08); 
   --on-accent: #FFFFFF;
 
+  /* 评分按钮颜色 */
   --again-bg: #B3261E;
   --hard-bg: #8A5A00;
   --good-bg: #1F6F43;
@@ -25,6 +28,9 @@
   --shadow: 0 4px 16px rgba(26, 35, 50, 0.06);
   --shadow-hover: 0 8px 24px rgba(26, 35, 50, 0.10);
 
+  /* 补上之前遗漏的导航栏背景色 */
+  --tab-bg: rgba(255, 255, 255, 0.85);
+
   color-scheme: light;
 }
 
@@ -34,12 +40,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  /* 加了一点点蓝色的径向渐变，显得不那么死板 */
+  background: radial-gradient(ellipse at 85% 0%, rgba(37, 99, 235, 0.05), transparent 30rem), var(--bg);
   color: var(--text);
   font-family: "Inter", system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
-  padding-bottom: 100px; /* Space for bottom tab bar */
+  padding-bottom: 100px; 
   -webkit-font-smoothing: antialiased;
 }
 
@@ -102,7 +109,7 @@ h1, h2, h3 {
   background: var(--tab-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(0,0,0,0.06);
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -128,14 +135,14 @@ h1, h2, h3 {
 }
 
 .tab-btn .tab-icon { font-size: 22px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-.tab-btn.active { color: var(--text); font-weight: 600; }
+.tab-btn.active { color: var(--accent); font-weight: 600; }
 .tab-btn.active .tab-icon { transform: translateY(-4px) scale(1.1); }
 
 .tab-center-btn {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--text);
+  background: var(--accent); /* 改成了主题蓝 */
   color: white;
   border: none;
   font-size: 26px;
@@ -143,7 +150,7 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   margin-top: -32px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); /* 蓝色阴影 */
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -168,13 +175,16 @@ h1, h2, h3 {
   transition: all 0.2s ease;
 }
 
-.btn:hover { border-color: var(--muted); }
-.btn-primary { background: var(--text); color: #FFF; border-color: var(--text); }
-.btn-primary:hover { background: #000; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* 主按钮改成了主题蓝 */
+.btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); color: var(--on-accent); }
+
 .btn-ghost { border: none; padding: 0 10px; background: transparent; }
-.btn-ghost:hover { background: var(--border); }
+.btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
 .btn-danger { color: var(--error); }
-.btn-danger:hover { background: #FFF0F0; border-color: var(--error); }
+.btn-danger:hover { background: #FFF0F0; border-color: var(--error); color: var(--error); }
 .btn-sort { padding: 0 12px; font-size: 16px; }
 .btn-sort:disabled { opacity: 0.2; cursor: not-allowed; }
 
@@ -186,12 +196,13 @@ input[type="text"], textarea {
   background: var(--surface);
   font-family: inherit;
   font-size: 15px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input[type="text"]:focus, textarea:focus {
   outline: none;
-  border-color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft); /* 聚焦时有一圈淡淡的光晕 */
 }
 
 /* ---------- Deck & Card Lists ---------- */
@@ -227,9 +238,9 @@ input[type="text"]:focus, textarea:focus {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
-.deck-row:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+.deck-row:hover { box-shadow: var(--shadow); border-color: #CBD5E1; }
 
 .deck-name {
   flex: 1;
@@ -241,8 +252,9 @@ input[type="text"]:focus, textarea:focus {
   cursor: pointer;
   color: var(--text);
   padding: 0;
+  transition: color 0.2s;
 }
-.deck-name:hover { text-decoration: underline; }
+.deck-name:hover { color: var(--accent); text-decoration: underline; }
 
 .card-row {
   display: flex;
@@ -266,7 +278,7 @@ input[type="text"]:focus, textarea:focus {
   border: 1px dashed var(--border);
   border-radius: 16px;
 }
-.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.8; }
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.8; color: var(--accent); }
 .empty-state h3 { margin: 0 0 8px; font-size: 18px; }
 
 /* ---------- Review Screen (3D Flashcards) ---------- */
@@ -289,7 +301,7 @@ input[type="text"]:focus, textarea:focus {
 }
 .progress-bar {
   height: 100%;
-  background: var(--text);
+  background: var(--accent); /* 进度条改成蓝色 */
   width: 0%;
   transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -331,7 +343,7 @@ input[type="text"]:focus, textarea:focus {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -342,8 +354,8 @@ input[type="text"]:focus, textarea:focus {
 
 .flashcard-back {
   transform: rotateY(180deg);
-  background: #FAFAFA;
-  border-color: var(--text);
+  background: #F8FAFC;
+  border-color: var(--accent); /* 卡片背面的边框改成蓝色 */
 }
 
 .flashcard-hint {
@@ -431,7 +443,7 @@ input[type="text"]:focus, textarea:focus {
   margin-bottom: 24px;
 }
 .stats-body dt { color: var(--muted); }
-.stats-body dd { margin: 0; font-family: "Playfair Display", serif; font-size: 26px; text-align: right; }
+.stats-body dd { margin: 0; font-family: "Playfair Display", serif; font-size: 26px; text-align: right; color: var(--accent); }
 
 /* ---------- Toasts ---------- */
 .toast-container {
