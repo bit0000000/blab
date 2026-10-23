@@ -1,5 +1,4 @@
 // ==== Revision Loop — app.js ====
-// UI layer. Depends on globals from storage.js and scheduler.js.
 
 (function () {
   'use strict';
@@ -21,32 +20,21 @@
     idCounter: 0,
     reviewQueue: null,
     initialReviewCount: 0,
-    sessionRatings: [], // NEW: Tracks ratings for the Confidence %
-    searchTerm: ''      // NEW: Tracks search text
+    sessionRatings: [],
+    searchTerm: ''
   };
 
-  // ---------------------------------------------------------------- Utilities
+  // Utilities
   function now() { return window.__RL_NOW ? new Date(window.__RL_NOW) : new Date(); }
   function pad2(n) { return n < 10 ? '0' + n : '' + n; }
   function dayKey(date) { return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate()); }
-  function previousDayKey(key) {
-    var p = key.split('-');
-    return dayKey(new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) - 1));
-  }
-  function generateId() {
-    if (window.crypto && typeof crypto.randomUUID === 'function') {
-      try { return crypto.randomUUID(); } catch (ignored) {}
-    }
-    state.idCounter += 1;
-    return Date.now() + '-' + state.idCounter;
-  }
-  function persist() {
-    if (!saveState(state.data)) console.warn('Revision Loop: save failed.');
-  }
+  function previousDayKey(key) { var p = key.split('-'); return dayKey(new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) - 1)); }
+  function generateId() { if (window.crypto && typeof crypto.randomUUID === 'function') { try { return crypto.randomUUID(); } catch (ignored) {} } state.idCounter += 1; return Date.now() + '-' + state.idCounter; }
+  function persist() { if (!saveState(state.data)) console.warn('Revision Loop: save failed.'); }
   function byId(id) { return document.getElementById(id); }
   function clearChildren(node) { node.textContent = ''; }
 
-  // NEW: Function to render Math formulas using KaTeX
+  // Render Math
   function renderMath(node) {
     if (window.renderMathInElement && node) {
       window.renderMathInElement(node, {
@@ -63,25 +51,20 @@
 
   function showToast(message) {
     var container = document.querySelector('.toast-container');
-    if (!container) {
-      container = el('div', { class: 'toast-container' });
-      document.body.appendChild(container);
-    }
+    if (!container) { container = el('div', { class: 'toast-container', 'aria-live': 'polite' }); document.body.appendChild(container); }
     var toast = el('div', { class: 'toast', text: message });
     container.appendChild(toast);
     setTimeout(function() {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      toast.style.transition = 'all 0.3s ease';
+      toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all 0.3s ease';
       setTimeout(function() { toast.remove(); }, 300);
     }, 3000);
   }
 
+  // Icons
   function getIcon(name, size = 16) {
     var svgs = {
       layers: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
       zap: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',
-      chart: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
       plus: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
       trash: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
       edit: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
@@ -91,7 +74,7 @@
       download: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
       upload: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
       refresh: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
-      search: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
+      fileText: '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
     };
     var div = document.createElement('div');
     div.innerHTML = svgs[name] || '';
@@ -106,9 +89,8 @@
       if (value === null || value === undefined) return;
       if (key === 'class' || key === 'className') node.className = value;
       else if (key === 'text') node.textContent = value;
-      else if (key === 'on') {
-        Object.keys(value).forEach(function (event) { node.addEventListener(event, value[event]); });
-      } else if (key in node) node[key] = value;
+      else if (key === 'on') { Object.keys(value).forEach(function (event) { node.addEventListener(event, value[event]); }); }
+      else if (key in node) node[key] = value;
       else node.setAttribute(key, value);
     });
     children.flat().forEach(function (child) {
@@ -118,7 +100,7 @@
     return node;
   }
 
-  // ---------------------------------------------------------------- Navigation
+  // Navigation
   function showScreen(screenId) {
     SCREEN_IDS.forEach(function (sid) {
       var node = byId(sid);
@@ -143,13 +125,21 @@
         
         if (target === 'cards') {
           if (!state.selectedDeckId) {
-            showToast('Select a deck first to add cards.');
             navigateTo('screen-decks');
-            return;
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelector('.tab-btn[data-target="decks"]').classList.add('active');
+            if (deckView.els && deckView.els.input) {
+              deckView.els.input.focus();
+              deckView.els.input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           } else {
             openCardsForDeck(state.selectedDeckId);
-            return;
+            if (cardView.els && cardView.els.question) {
+              cardView.els.question.focus();
+              cardView.els.question.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           }
+          return;
         }
 
         var screenId = 'screen-' + target;
@@ -169,20 +159,24 @@
         if (e.key === '4') rateCard('easy');
       }
     });
+
+    // Help Modal Logic
+    var helpModal = byId('help-modal');
+    byId('help-btn').addEventListener('click', function() { helpModal.hidden = false; });
+    byId('close-help').addEventListener('click', function() { helpModal.hidden = true; });
+    helpModal.addEventListener('click', function(e) { if (e.target === helpModal) helpModal.hidden = true; });
   }
 
-  // ---------------------------------------------------------------- Deck View
+  // Deck View
   var deckView = {
     els: null,
     mount: function () {
       if (this.els) return;
       var screen = byId('screen-decks');
       if (!screen) return;
-
       var input = el('input', { type: 'text', id: 'deck-input', class: 'deck-input', placeholder: 'New deck name', maxLength: MAX_DECK_NAME, on: { keydown: function (e) { if (e.key === 'Enter') addDeck(); } } });
       var addButton = el('button', { type: 'button', class: 'btn btn-primary', on: { click: addDeck } }, getIcon('plus'), ' Add deck');
       var list = el('ul', { class: 'deck-list' });
-
       screen.appendChild(el('div', { class: 'deck-controls' }, input, addButton));
       screen.appendChild(list);
       this.els = { input: input, list: list };
@@ -191,7 +185,6 @@
       if (!this.els) return;
       clearChildren(this.els.list);
       var decks = state.data.decks.slice().sort(function (a, b) { return a.createdAt - b.createdAt; });
-      
       if (decks.length === 0) {
         this.els.list.appendChild(el('div', { class: 'empty-state' },
           el('div', { class: 'empty-icon' }, getIcon('layers', 48)),
@@ -200,7 +193,6 @@
         ));
         return;
       }
-      
       var self = this;
       decks.forEach(function (deck) { 
         var count = state.data.cards.filter(function(c) { return c.deckId === deck.id; }).length;
@@ -229,7 +221,6 @@
     var name = deckView.els.input.value.trim();
     if (!name) return showToast('Deck name cannot be empty.');
     if (state.data.decks.some(function (d) { return d.name.toLowerCase() === name.toLowerCase(); })) return showToast('Deck already exists.');
-    
     state.data.decks.push({ id: generateId(), name: name, createdAt: Date.now() });
     persist();
     deckView.els.input.value = '';
@@ -248,7 +239,7 @@
     showToast('Deck deleted.');
   }
 
-  // ---------------------------------------------------------------- Card View
+  // Card View
   var cardView = {
     els: null,
     mount: function () {
@@ -259,7 +250,6 @@
       var title = el('h2', { id: 'cards-heading', class: 'screen-title', text: 'Cards' });
       var back = el('button', { type: 'button', class: 'btn btn-ghost', on: { click: function () { showScreen('screen-decks'); } } }, getIcon('back'), ' Back to Decks');
       
-      // NEW: Search bar
       var search = el('input', { 
         type: 'text', 
         placeholder: 'Search cards...', 
@@ -287,7 +277,6 @@
       var deck = findDeck(state.selectedDeckId);
       if (deck) this.els.title.textContent = 'Editing: ' + deck.name;
 
-      // NEW: Filter by search term
       var cards = state.data.cards.filter(function (c) { 
         var matchesSearch = state.searchTerm === '' || 
                             c.question.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
@@ -313,10 +302,8 @@
     var isFirst = deckCards[0] && deckCards[0].id === card.id;
     var isLast = deckCards[deckCards.length - 1] && deckCards[deckCards.length - 1].id === card.id;
 
-    // Render Math inside the card list
     var qDiv = el('p', { class: 'card-q' });
     qDiv.innerHTML = card.question;
-    
     var aDiv = el('p', { class: 'card-a' });
     aDiv.innerHTML = card.answer;
 
@@ -329,8 +316,6 @@
         el('button', { type: 'button', class: 'btn btn-ghost btn-danger', on: { click: function () { deleteCard(card.id); } } }, getIcon('trash'), ' Delete')
       )
     );
-
-    // Call KaTeX to render math after building the row
     renderMath(row);
     return row;
   }
@@ -340,7 +325,6 @@
     var index = deckCards.findIndex(function (c) { return c.id === id; });
     var swapIndex = index + direction;
     if (swapIndex < 0 || swapIndex >= deckCards.length) return;
-
     var cardA = deckCards[index], cardB = deckCards[swapIndex];
     var masterA = state.data.cards.indexOf(cardA), masterB = state.data.cards.indexOf(cardB);
     state.data.cards[masterA] = cardB; state.data.cards[masterB] = cardA;
@@ -350,11 +334,10 @@
 
   function openCardsForDeck(id) {
     state.selectedDeckId = id;
-    state.searchTerm = ''; // Reset search on deck open
+    state.searchTerm = '';
     if (cardView.els && cardView.els.search) cardView.els.search.value = '';
     cardView.render();
     showScreen('screen-cards');
-    
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelector('.tab-btn[data-target="decks"]').classList.add('active');
   }
@@ -364,10 +347,8 @@
     var q = cardView.els.question.value.trim();
     var a = cardView.els.answer.value.trim();
     if (!q || !a) return showToast('Both question and answer are required.');
-    
     state.data.cards.push({ id: generateId(), deckId: state.selectedDeckId, question: q, answer: a, createdAt: Date.now(), dueAt: null, intervalDays: 0, lastRating: null, reps: 0 });
     persist();
-    
     cardView.els.question.value = '';
     cardView.els.answer.value = '';
     cardView.render();
@@ -395,7 +376,7 @@
     showToast('Card deleted.');
   }
 
-  // ---------------------------------------------------------------- Review View
+  // Review View
   var reviewView = {
     els: null,
     mount: function () {
@@ -416,9 +397,7 @@
 
       var revealButton = el('button', { type: 'button', class: 'btn btn-primary reveal-btn', text: 'Show Answer (Space)', on: { click: function () { self.reveal(); } } });
       var ratingRow = el('div', { class: 'rating-row', hidden: true });
-      RATINGS.forEach(function (r) {
-        ratingRow.appendChild(el('button', { type: 'button', class: 'btn rating-btn rating-' + r.id, text: r.label, on: { click: function () { rateCard(r.id); } } }));
-      });
+      RATINGS.forEach(function (r) { ratingRow.appendChild(el('button', { type: 'button', class: 'btn rating-btn rating-' + r.id, text: r.label, on: { click: function () { rateCard(r.id); } } })); });
       
       var empty = el('div', { class: 'muted', hidden: true, style: 'text-align: center; margin-top: 40px;' });
       var wrapper = el('div', { class: 'review-wrapper' }, progressContainer, deckName, flashcard, revealButton, ratingRow, empty);
@@ -443,14 +422,12 @@
       this.els.progressBar.parentElement.hidden = true;
       this.els.empty.hidden = false;
       
-      // NEW: Confidence Score Calculation
       if (state.sessionRatings.length > 0) {
         var score = 0;
         state.sessionRatings.forEach(function(r) {
           if (r === 'easy') score += 100;
           else if (r === 'good') score += 80;
           else if (r === 'hard') score += 50;
-          else if (r === 'again') score += 0;
         });
         var percent = Math.round(score / state.sessionRatings.length);
         
@@ -470,31 +447,20 @@
       if (!this.els) return;
       var deck = state.selectedDeckId ? findDeck(state.selectedDeckId) : null;
       
-      if (!deck) {
-        this.els.deckName.textContent = '';
-        return this.showEmpty('Pick a deck from the home screen first.');
-      }
+      if (!deck) { this.els.deckName.textContent = ''; return this.showEmpty('Pick a deck from the home screen first.'); }
 
       if (!state.reviewQueue) {
         var t = now();
         state.reviewQueue = state.data.cards.filter(function (c) { return c.deckId === deck.id && isDue(c, t); });
-        // Apply shuffle if requested
-        if (window.shuffleNext) {
-          state.reviewQueue.sort(function() { return Math.random() - 0.5; });
-          window.shuffleNext = false;
-        } else {
-          state.reviewQueue.sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); });
-        }
+        if (window.shuffleNext) { state.reviewQueue.sort(function() { return Math.random() - 0.5; }); window.shuffleNext = false; }
+        else { state.reviewQueue.sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); }); }
         state.initialReviewCount = state.reviewQueue.length;
       }
       
       var t2 = now();
       var due = state.reviewQueue.filter(function (c) { return isDue(c, t2); });
       
-      if (due.length === 0) {
-        this.els.deckName.textContent = 'Reviewing: ' + deck.name;
-        return this.showEmpty('Nothing due today. Go rest!');
-      }
+      if (due.length === 0) { this.els.deckName.textContent = 'Reviewing: ' + deck.name; return this.showEmpty('Nothing due today. Go rest!'); }
       
       this.els.flashcardContainer.hidden = false;
       this.els.progressBar.parentElement.hidden = false;
@@ -502,12 +468,10 @@
       
       var percent = ((state.initialReviewCount - due.length) / state.initialReviewCount) * 100;
       this.els.progressBar.style.width = percent + '%';
-
       this.els.deckName.textContent = 'Reviewing: ' + deck.name + ' (' + due.length + ' left)';
       state.currentCard = due[0];
       this.els.empty.hidden = true;
       
-      // Render Math in the flashcard
       this.els.question.innerHTML = state.currentCard.question;
       this.els.answer.innerHTML = state.currentCard.answer;
       renderMath(this.els.flashcardContainer);
@@ -521,11 +485,10 @@
   function openReviewForDeck(id, shuffle = false) {
     state.selectedDeckId = id;
     state.reviewQueue = null;
-    state.sessionRatings = []; // Reset confidence tracking
-    window.shuffleNext = shuffle; // Set flag for render
+    state.sessionRatings = [];
+    window.shuffleNext = shuffle;
     reviewView.render();
     showScreen('screen-review');
-    
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelector('.tab-btn[data-target="review"]').classList.add('active');
   }
@@ -535,8 +498,7 @@
     if (!card) return;
     reviewView.els.ratingRow.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     reviewView.els.flashcardContainer.classList.add('card-exit');
-
-    state.sessionRatings.push(rating); // Track rating
+    state.sessionRatings.push(rating);
 
     setTimeout(function () {
       var t = now();
@@ -548,34 +510,35 @@
       var key = dayKey(t);
       state.data.reviewsByDay[key] = (state.data.reviewsByDay[key] || 0) + 1;
       persist();
-      
       reviewView.els.flashcardContainer.classList.remove('card-exit');
       reviewView.render();
     }, 400); 
   }
 
-  // ---------------------------------------------------------------- Stats View
+  // Stats View
   var statsView = {
     els: null,
     mount: function () {
       if (this.els) return;
       var screen = byId('screen-stats');
       if (!screen) return;
-
       var body = el('dl', { class: 'stats-body' });
+      
       var exportBtn = el('button', { type: 'button', class: 'btn btn-primary', on: { click: exportJSON } }, getIcon('download'), ' Export JSON');
+      var exportTxtBtn = el('button', { type: 'button', class: 'btn btn-ghost', style: 'margin-left: 8px;', on: { click: exportTXT } }, getIcon('fileText'), ' Export .txt');
       
       var importInput = el('input', { type: 'file', accept: '.json', hidden: true });
       importInput.addEventListener('change', function () { if (this.files[0]) importJSON(this.files[0]); this.value = ''; });
-      var importLabel = el('label', { class: 'btn btn-ghost', style: 'margin-left: 8px; cursor: pointer;' }, getIcon('upload'), ' Import JSON', importInput);
-
-      var wrap = el('div', { class: 'stats-wrap' }, body, el('div', {}, exportBtn, importLabel));
+      var importLabel = el('label', { class: 'btn btn-ghost', style: 'margin-left: 8px; cursor: pointer;' }, getIcon('upload'), ' Import', importInput);
       
-      if (IS_LOCAL) {
-        wrap.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-danger', style: 'margin-top: 20px;', on: { click: resetAll } }, getIcon('refresh'), ' Reset all data'));
-      }
+      var chartWrap = el('div', { id: 'stats-chart', class: 'chart-container' });
+      var chartLabel = el('p', { class: 'muted', style: 'text-align: center; font-size: 12px;', text: 'Reviews this week' });
+
+      var wrap = el('div', { class: 'stats-wrap' }, body, chartLabel, chartWrap, el('div', { style: 'margin-top: 20px;' }, exportBtn, exportTxtBtn, importLabel));
+      
+      if (IS_LOCAL) { wrap.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-danger', style: 'margin-top: 20px;', on: { click: resetAll } }, getIcon('refresh'), ' Reset all data')); }
       screen.appendChild(wrap);
-      this.els = { body: body };
+      this.els = { body: body, chartWrap: chartWrap };
     },
     render: function () {
       if (!this.els) return;
@@ -590,9 +553,35 @@
       this.els.body.appendChild(el('dt', { text: 'Cards reviewed today' }));
       this.els.body.appendChild(el('dd', { text: String(reviewedToday) }));
       this.els.body.appendChild(el('dt', { text: 'Streak' }));
-      
       var label = reviewedToday > 0 ? streak + '-day streak' : (streak > 0 ? streak + '-day streak (review to keep it)' : '0-day streak');
       this.els.body.appendChild(el('dd', { text: label }));
+
+      // Render 7-Day Chart
+      clearChildren(this.els.chartWrap);
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var last7 = [];
+      var maxCount = 1;
+
+      for (var i = 6; i >= 0; i--) {
+        var d = new Date(t.getFullYear(), t.getMonth(), t.getDate() - i);
+        var key = dayKey(d);
+        var count = (state.data.reviewsByDay || {})[key] || 0;
+        if (count > maxCount) maxCount = count;
+        last7.push({ label: days[d.getDay()], count: count });
+      }
+
+      last7.forEach(function(day) {
+        var heightPercent = (day.count / maxCount) * 100;
+        if (day.count === 0) heightPercent = 5; // minimum bar height
+        var hasData = day.count > 0 ? 'has-data' : '';
+        
+        this.els.chartWrap.appendChild(
+          el('div', { class: 'chart-bar-wrap' },
+            el('div', { class: 'chart-bar ' + hasData, style: 'height: ' + heightPercent + '%;', title: day.count + ' reviews' }),
+            el('div', { class: 'chart-label', text: day.label })
+          )
+        );
+      }, this);
     }
   };
 
@@ -624,6 +613,27 @@
     URL.revokeObjectURL(url);
   }
 
+  function exportTXT() {
+    var textContent = "=== REVISION LOOP EXPORT ===\n\n";
+    state.data.decks.forEach(function(deck) {
+      textContent += "DECK: " + deck.name.toUpperCase() + "\n";
+      textContent += "----------------------------------------\n";
+      var deckCards = state.data.cards.filter(function(c) { return c.deckId === deck.id; });
+      if (deckCards.length === 0) textContent += "(No cards in this deck)\n";
+      deckCards.forEach(function(card, i) {
+        textContent += "Q" + (i+1) + ": " + card.question + "\n";
+        textContent += "A" + (i+1) + ": " + card.answer + "\n\n";
+      });
+      textContent += "\n";
+    });
+
+    var blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: 'revisionLoop-flashcards.txt' });
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   function importJSON(file) {
     var reader = new FileReader();
     reader.onload = function () {
@@ -644,7 +654,7 @@
     reader.readAsText(file);
   }
 
-  // ---------------------------------------------------------------- Startup
+  // Startup
   function initializeApp() {
     state.data = loadState();
     if (!state.data.reviewsByDay) state.data.reviewsByDay = {};
