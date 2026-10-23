@@ -23,7 +23,10 @@
   <div class="app-layout">
     <header class="top-header">
       <h1 class="header-title">Revision Loop</h1>
-      <span class="header-sub">Spaced Repetition</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="header-sub">Spaced Repetition</span>
+        <button id="help-btn" aria-label="Help and Shortcuts">?</button>
+      </div>
     </header>
 
     <main>
@@ -46,7 +49,25 @@
     </main>
   </div>
 
-  <!-- Bottom Navigation (Icons hardcoded so they never disappear) -->
+  <!-- Help Modal -->
+  <div id="help-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <h3>How to use Revision Loop</h3>
+      <p><strong>Keyboard Shortcuts:</strong></p>
+      <ul>
+        <li><code>Space</code> — Flip the flashcard</li>
+        <li><code>1</code> — Again (10 mins)</li>
+        <li><code>2</code> — Hard (1 day)</li>
+        <li><code>3</code> — Good (3 days)</li>
+        <li><code>4</code> — Easy (7 days)</li>
+      </ul>
+      <p><strong>Math & Science Formulas:</strong></p>
+      <p>Wrap formulas in dollar signs to make them look real. E.g., <code>$H_2O$</code> becomes <i>H₂O</i>, and <code>$E=mc^2$</code> becomes <i>E=mc²</i>.</p>
+      <button class="btn btn-primary" id="close-help">Got it</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
   <nav class="bottom-tab-bar" aria-label="Primary">
     <button type="button" class="tab-btn active" data-target="decks">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
@@ -58,7 +79,7 @@
       <span class="tab-text">Review</span>
     </button>
     
-    <button type="button" class="tab-center-btn" data-target="cards" aria-label="Add Cards">
+    <button type="button" class="tab-center-btn" data-target="cards" aria-label="Add new flashcards">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
     </button>
 
