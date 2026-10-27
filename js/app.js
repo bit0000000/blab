@@ -433,7 +433,7 @@
         
         this.els.empty.innerHTML = `
           <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
-          <h3 style="margin-bottom: 8px; font-family: 'Playfair Display', serif;">Review Complete!</h3>
+          <h3 style="margin-bottom: 8px; font-family: var(--font-heading); font-weight: 600;">Review Complete!</h3>
           <p style="font-size: 28px; color: var(--accent); font-weight: 700; margin: 10px 0;">${percent}% Confidence</p>
           <p class="muted" style="margin-bottom: 20px;">Based on how you rated your cards today.</p>
           <button class="btn btn-primary" style="padding: 0 30px;" onclick="document.querySelector('.tab-btn[data-target=\\'decks\\']').click()">Back to Decks</button>
@@ -572,7 +572,7 @@
 
       last7.forEach(function(day) {
         var heightPercent = (day.count / maxCount) * 100;
-        if (day.count === 0) heightPercent = 5; // minimum bar height
+        if (day.count === 0) heightPercent = 5;
         var hasData = day.count > 0 ? 'has-data' : '';
         
         this.els.chartWrap.appendChild(
@@ -658,6 +658,23 @@
   function initializeApp() {
     state.data = loadState();
     if (!state.data.reviewsByDay) state.data.reviewsByDay = {};
+    
+    // --- FONT TOGGLE LOGIC ---
+    var root = document.documentElement;
+    var savedFont = localStorage.getItem('rl-font') || 'sans';
+    if (savedFont === 'mono') root.setAttribute('data-font', 'mono');
+
+    byId('font-toggle').addEventListener('click', function() {
+      if (root.getAttribute('data-font') === 'mono') {
+        root.removeAttribute('data-font');
+        localStorage.setItem('rl-font', 'sans');
+      } else {
+        root.setAttribute('data-font', 'mono');
+        localStorage.setItem('rl-font', 'mono');
+      }
+    });
+    // -------------------------
+
     deckView.mount();
     cardView.mount();
     reviewView.mount();
